@@ -1,3 +1,6 @@
 [submodule "vic-toolchain"]
 	path = vic-toolchain
 	url = https://github.com/kercre123/vic-toolchain.git
+[submodule "vector-gobot"]
+	path = vector-gobot
+	url = https://github.com/os-vector/vector-gobot

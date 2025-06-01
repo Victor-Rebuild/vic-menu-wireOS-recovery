@@ -4,4 +4,6 @@
 Build with ./build.sh
 
 ## Deploying
-Scp main over to /data/vic-menu, if u want to change ota list modify ota-list.json and then scp that over to /data/ota-list.json
+- `scp` build/vic-menu over to /data/vic-menu. If you want to change the OTA list, modify ota-list.json then `scp` that over to /data/ota-list.json.
+- You should also `scp` build/libvector-gobot.so to /lib/.
+
