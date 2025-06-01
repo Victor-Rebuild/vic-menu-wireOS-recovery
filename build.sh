@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TC=/home/thommomc/Documents/Vector/vector-gobot/vic-toolchain/arm-linux-gnueabi/bin/arm-linux-gnueabi-
+TC=$PWD/vic-toolchain/arm-linux-gnueabi/bin/arm-linux-gnueabi-
 
 CC=${TC}gcc \
 CXX=${TC}g++ \
