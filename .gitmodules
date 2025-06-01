@@ -1,0 +1,3 @@
+[submodule "vic-toolchain"]
+	path = vic-toolchain
+	url = https://github.com/kercre123/vic-toolchain.git

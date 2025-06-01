@@ -64,7 +64,7 @@ func readIntFromFile(path string) (int64, error) {
 func updateProgressScreen(progress float64) {
 	linesShow := []vscreen.Line{
 		{
-			Text:  "Installing WireOS...",
+			Text:  "Installing OTA...",
 			Color: color.RGBA{0, 255, 0, 255},
 		},
 		{

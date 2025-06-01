@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
+	"encoding/json"
 	"github.com/kercre123/vector-gobot/pkg/vbody"
 	"github.com/kercre123/vector-gobot/pkg/vscreen"
 )
@@ -32,6 +32,21 @@ type List struct {
 	Position  int
 	ClickFunc []func()
 	inited    bool
+}
+
+type OTA struct {
+	Name string
+	URL string
+}
+
+var availableOTAs []OTA
+
+func LoadOTAConfig() error {
+    data, err := os.ReadFile("/data/ota-list.json")
+    if err != nil {
+        return err
+    }
+    return json.Unmarshal(data, &availableOTAs)
 }
 
 func (c *List) MoveDown() {
@@ -320,7 +335,7 @@ func ClearUserData_Create() *List {
 	return &Reboot
 }
 
-func InstallWireOS() {
+func InstallSelectedOTA(url string) {
 	HangBody = true
 	if ssid, _ := getNet(); ssid == "<not connected>" {
 		scrnData := vscreen.CreateTextImage("This bot must first be connected to a Wi-Fi network.")
@@ -331,7 +346,7 @@ func InstallWireOS() {
 		HangBody = false
 		return
 	}
-	err := StreamOTA("http://ota.pvic.xyz/vic/latest/oskr.ota")
+	err := StreamOTA(url)
 	if err != nil {
 		fmt.Println(err)
 		if strings.Contains(err.Error(), "button") {
@@ -448,7 +463,17 @@ func Recovery_Create() *List {
 	Test.Info = "Recovery Menu"
 	Test.InfoColor = color.RGBA{0, 255, 0, 255}
 
-	Test.ClickFunc = []func(){StartAnki_Confirm, ClearUserData, PrintBodyInfo, PrintNetworkInfo, Rebooter, InstallWireOS}
+	Test.ClickFunc = []func(){
+       StartAnki_Confirm,
+       ClearUserData,
+       PrintBodyInfo,
+       PrintNetworkInfo,
+       Rebooter,
+       func() {
+           CurrentList = ShowOTAList_Create()
+          CurrentList.Init()
+       },
+   	} 
 
 	Test.Lines = []vscreen.Line{
 		{
@@ -472,7 +497,7 @@ func Recovery_Create() *List {
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
-			Text:  "Install latest Viccyware",
+			Text:  "Install latest OTA",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 	}
@@ -503,6 +528,97 @@ func Confirm_Create(do func(), origList List) *List {
 	}
 
 	return &Test
+}
+
+func ShowOTAListPage(page int) *List {
+    const perPage = 4
+    total := len(availableOTAs)
+    start := page * perPage
+    end := start + perPage
+    if end > total {
+        end = total
+    }
+
+    var l List
+    l.Info = fmt.Sprintf("OTAs %d-%d of %d", start+1, end, total)
+    l.InfoColor = color.RGBA{0, 255, 0, 255}
+
+    // show this page's OTAs
+    for _, ota := range availableOTAs[start:end] {
+        url := ota.URL
+        l.ClickFunc = append(l.ClickFunc, func() {
+            CurrentList = Confirm_Create(func() {
+                InstallSelectedOTA(url)
+            }, *CurrentList)
+            CurrentList.Init()
+        })
+        l.Lines = append(l.Lines, vscreen.Line{
+            Text:  ota.Name,
+            Color: color.RGBA{255, 255, 255, 255},
+        })
+    }
+
+    // Prev button?
+    if page > 0 {
+        prev := page - 1
+        l.ClickFunc = append(l.ClickFunc, func() {
+            CurrentList = ShowOTAListPage(prev)
+            CurrentList.Init()
+        })
+        l.Lines = append(l.Lines, vscreen.Line{
+            Text:  "< Prev",
+            Color: color.RGBA{255, 255, 255, 255},
+        })
+    }
+
+    // Next button?
+    if end < total {
+        next := page + 1
+        l.ClickFunc = append(l.ClickFunc, func() {
+            CurrentList = ShowOTAListPage(next)
+            CurrentList.Init()
+        })
+        l.Lines = append(l.Lines, vscreen.Line{
+            Text:  "Next >",
+            Color: color.RGBA{255, 255, 255, 255},
+        })
+    }
+
+    // Back to main recovery menu
+    l.ClickFunc = append(l.ClickFunc, func() {
+        CurrentList = Recovery_Create()
+        CurrentList.Init()
+    })
+    l.Lines = append(l.Lines, vscreen.Line{
+        Text:  "Exit",
+        Color: color.RGBA{255, 255, 255, 255},
+    })
+
+    return &l
+}
+
+// entry point remains page 0
+func ShowOTAList_Create() *List {
+	if availableOTAs == nil {
+        if err := LoadOTAConfig(); err != nil {
+            // show an error and return to recovery
+            var errList List
+            errList.Info = "Error loading OTA list"
+            errList.InfoColor = color.RGBA{255, 0, 0, 255}
+            errList.Lines = []vscreen.Line{
+                {Text: err.Error(), Color: errList.InfoColor},
+                {Text: "Back",       Color: color.RGBA{255, 255, 255, 255}},
+            }
+            errList.ClickFunc = []func(){
+                func() {
+                    CurrentList = Recovery_Create()
+                    CurrentList.Init()
+                },
+            }
+            return &errList
+        }
+    }
+    return ShowOTAListPage(0)
 }
 
 func TestIfBodyWorking() {

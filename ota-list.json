@@ -1,0 +1,19 @@
+[
+  {
+    "name": "WireOS Dev",
+    "url": "http://ota.pvic.xyz/vic/latest/dev.ota"
+  },
+  {
+    "name": "WireOS OSKR",
+    "url": "http://ota.pvic.xyz/vic/latest/oskr.ota"
+  },
+  {
+    "name": "Viccyware Dev",
+    "url": "http://ota.viccyware.com/latest-dev.ota"
+  },
+  {
+    "name": "Viccyware OSKR",
+    "url": "http://ota.viccyware.com/latest-oskr.ota"
+  }
+]
+
