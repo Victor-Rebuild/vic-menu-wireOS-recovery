@@ -14,6 +14,14 @@
   {
     "name": "Viccyware OSKR",
     "url": "http://ota.viccyware.com/latest-oskr.ota"
+  },
+  {
+    "name": "ThommOS Dev",
+    "url": "http://anki.thommo.dev/latest-dev.ota"
+  },
+  {
+    "name": "ThommOS OSKR",
+    "url": "http://anki.thommo.dev/latest-oskr.ota"
   }
 ]
 
