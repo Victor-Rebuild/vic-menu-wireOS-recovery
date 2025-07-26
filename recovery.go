@@ -411,42 +411,6 @@ func PrintNetworkInfo() {
 	HangBody = false
 }
 
-func GetHeadTemp() string {
-	sysTemp, err := os.ReadFile("/sys/class/thermal/thermal_zone0/temp")
-	if err != nil {
-		panic(err)
-	}
-	return strings.TrimSpace(string(sysTemp))
-}
-
-func PrintBodyInfo() {
-	c := *CurrentList
-	HangBody = true
-	time.Sleep(time.Second / 3)
-	for {
-		time.Sleep(time.Millisecond * 3)
-		frame := GetFrame()
-		if frame.ButtonState {
-			break
-		}
-		lines := []string{
-			"CHGR: " + fmt.Sprint(frame.ChargerVoltage) + "mV, BATT: " + fmt.Sprint(frame.BattVoltage) + "mV",
-			"TEMP: H-" + GetHeadTemp() + "C, B-" + fmt.Sprint(frame.BodyTemp) + "C",
-			"TOUCH: " + fmt.Sprint(frame.Touch),
-			"CLIFF: " + fmt.Sprint(frame.Cliffs[0]) + " " + fmt.Sprint(frame.Cliffs[1]) + " " + fmt.Sprint(frame.Cliffs[2]) + " " + fmt.Sprint(frame.Cliffs[3]),
-			"DIST:" + fmt.Sprint(frame.ProxAmbient) + " " + fmt.Sprint(frame.ProxCalibResult) + " " + fmt.Sprint(frame.ProxRawRangeMM) + " " + fmt.Sprint(frame.ProxSPADCount),
-			fmt.Sprint(frame.ProxSampleCount) + " " + fmt.Sprint(frame.ProxSigmaMM) + " " + fmt.Sprint(frame.ProxSignalRateMCPS),
-			"> Back",
-		}
-		scrnData := vscreen.CreateTextImageFromSlice(lines)
-		vscreen.SetScreen(scrnData)
-	}
-	CurrentList = &c
-	CurrentList.Init()
-	time.Sleep(time.Second / 3)
-	HangBody = false
-}
-
 func Rebooter() {
 	CurrentList = Reboot_Create()
 	CurrentList.Init()
@@ -460,13 +424,12 @@ func ClearUserData() {
 func Recovery_Create() *List {
 	var Test List
 
-	Test.Info = "Diode Recovery Menu"
+	Test.Info = "Vec2.0 Recovery Menu"
 	Test.InfoColor = color.RGBA{0, 255, 0, 255}
 
 	Test.ClickFunc = []func(){
        StartAnki_Confirm,
        ClearUserData,
-       PrintBodyInfo,
        PrintNetworkInfo,
        Rebooter,
        func() {
@@ -484,10 +447,6 @@ func Recovery_Create() *List {
 			Text:  "Clear user data",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
-		//{
-		//	Text:  "Print sensor info",
-		//	Color: color.RGBA{255, 255, 255, 255},
-		//},
 		{
 			Text:  "Print network info",
 			Color: color.RGBA{255, 255, 255, 255},
