@@ -1,3 +1,4 @@
+
 [
   {
     "name": "WireOS Dev",
@@ -16,12 +17,27 @@
     "url": "http://ota.viccyware.com/latest-oskr.ota"
   },
   {
-    "name": "ThommOS Dev",
+    "name": "PurplOS",
+    "url": "http://update-server.api.froggitti.net:81/latest/dev.ota"
+  },
+  {
+    "name": "RedOS",
+    "url": "http://ota-cdn.ekeleze.net:82/latest/dev.ota"
+  },
+  {
+    "name": "thommOS Dev",
     "url": "http://anki.thommo.dev/latest-dev.ota"
   },
   {
-    "name": "ThommOS OSKR",
-    "url": "http://anki.thommo.dev/latest-oskr.ota"
+    "name": "rainbOS Dev",
+    "url": "http://api.froggitti.net/ota/dev/rainbos.ota"
+  },
+  {
+    "name": "Anki 1.6.0.3331 Dev",
+    "url": "http://api.froggitti.net/ota/ankidev/1.6dev.ota"
+  },
+  {
+    "name": "Anki 2.0.1.6081 PROD",
+    "url": "http://api.froggitti.net/ota/ankidev/2.0.1.6081rmi.ota"
   }
 ]
-
