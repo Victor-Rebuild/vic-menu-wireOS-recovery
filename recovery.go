@@ -77,7 +77,7 @@ func (c *List) UpdateScreen() {
 		if numOfSpaces < 0 {
 			panic("too many items in list" + fmt.Sprint(numOfSpaces))
 		}
-		for i := 1; i < numOfSpaces; i++ {
+		for i := 2; i < numOfSpaces; i++ {
 			newLine = vscreen.Line{
 				Text:  " ",
 				Color: c.InfoColor,
