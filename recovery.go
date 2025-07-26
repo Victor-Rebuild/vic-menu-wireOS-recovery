@@ -42,7 +42,7 @@ type OTA struct {
 var availableOTAs []OTA
 
 func LoadOTAConfig() error {
-    data, err := os.ReadFile("/data/ota-list.json")
+    data, err := os.ReadFile("/data/vic-menu/ota-list.json")
     if err != nil {
         return err
     }
@@ -335,7 +335,7 @@ func ClearUserData_Create() *List {
 	return &Reboot
 }
 
-func InstallSelectedOTA(url string) {
+func InstallSelected(url string) {
 	HangBody = true
 	if ssid, _ := getNet(); ssid == "<not connected>" {
 		scrnData := vscreen.CreateTextImage("The robot must first be connected to Wi-Fi.")
@@ -346,7 +346,7 @@ func InstallSelectedOTA(url string) {
 		HangBody = false
 		return
 	}
-	err := StreamOTA(url)
+	err := Stream(url)
 	if err != nil {
 		fmt.Println(err)
 		if strings.Contains(err.Error(), "button") {
@@ -355,7 +355,7 @@ func InstallSelectedOTA(url string) {
 			time.Sleep(time.Second / 3)
 			HangBody = false
 		} else {
-			scrnData := vscreen.CreateTextImage("Error downloading OTA: " + err.Error())
+			scrnData := vscreen.CreateTextImage("Error downloading : " + err.Error())
 			vscreen.SetScreen(scrnData)
 			time.Sleep(time.Second * 3)
 			CurrentList = Recovery_Create()
@@ -433,7 +433,7 @@ func Recovery_Create() *List {
        PrintNetworkInfo,
        Rebooter,
        func() {
-           CurrentList = ShowOTAList_Create()
+           CurrentList = ShowList_Create()
           CurrentList.Init()
        },
    	} 
@@ -456,7 +456,7 @@ func Recovery_Create() *List {
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
-			Text:  "Install latest OTA",
+			Text:  "Install latest ",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 	}
@@ -489,20 +489,20 @@ func Confirm_Create(do func(), origList List) *List {
 	return &Test
 }
 
-func ShowOTAListPage(page int) *List {
+func ShowListPage(page int) *List {
     const perPage = 3
-    total := len(availableOTAs)
+    tl := len(availables)
     start := page * perPage
     end := start + perPage
-    if end > total {
-        end = total
+    if end > tl {
+        end = tl
     }
 
     var l List
-    l.Info = fmt.Sprintf("OTAs %d-%d of %d", start+1, end, total)
+    l.Info = fmt.Sprintf("s %d-%d of %d", start+1, end, tl)
     l.InfoColor = color.RGBA{0, 255, 0, 255}
 
-    // show this page's OTAs
+    // show this page's s
     for _, ota := range availableOTAs[start:end] {
         url := ota.URL
         l.ClickFunc = append(l.ClickFunc, func() {
