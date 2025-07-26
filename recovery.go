@@ -477,7 +477,7 @@ func Recovery_Create() *List {
 
 	Test.Lines = []vscreen.Line{
 		{
-			Text:  "Start Vector processes",
+			Text:  "Start anki-robot",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
@@ -493,7 +493,7 @@ func Recovery_Create() *List {
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
-			Text:  "Reboot to system a",
+			Text:  "Reboot to system_a",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
