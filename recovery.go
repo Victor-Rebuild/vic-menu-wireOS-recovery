@@ -460,7 +460,7 @@ func ClearUserData() {
 func Recovery_Create() *List {
 	var Test List
 
-	Test.Info = "Recovery Menu"
+	Test.Info = "Diode Recovery Menu"
 	Test.InfoColor = color.RGBA{0, 255, 0, 255}
 
 	Test.ClickFunc = []func(){
@@ -484,14 +484,14 @@ func Recovery_Create() *List {
 			Text:  "Clear user data",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
-		{
-			Text:  "Print sensor info",
-			Color: color.RGBA{255, 255, 255, 255},
-		},
-		{
-			Text:  "Print network info",
-			Color: color.RGBA{255, 255, 255, 255},
-		},
+		//{
+		//	Text:  "Print sensor info",
+		//	Color: color.RGBA{255, 255, 255, 255},
+		//},
+		//{
+		//	Text:  "Print network info",
+		//	Color: color.RGBA{255, 255, 255, 255},
+		//},
 		{
 			Text:  "Reboot to system a",
 			Color: color.RGBA{255, 255, 255, 255},
@@ -531,7 +531,7 @@ func Confirm_Create(do func(), origList List) *List {
 }
 
 func ShowOTAListPage(page int) *List {
-    const perPage = 4
+    const perPage = 3
     total := len(availableOTAs)
     start := page * perPage
     end := start + perPage
