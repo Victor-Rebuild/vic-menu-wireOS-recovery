@@ -488,10 +488,10 @@ func Recovery_Create() *List {
 		//	Text:  "Print sensor info",
 		//	Color: color.RGBA{255, 255, 255, 255},
 		//},
-		//{
-		//	Text:  "Print network info",
-		//	Color: color.RGBA{255, 255, 255, 255},
-		//},
+		{
+			Text:  "Print network info",
+			Color: color.RGBA{255, 255, 255, 255},
+		},
 		{
 			Text:  "Reboot to system a",
 			Color: color.RGBA{255, 255, 255, 255},
