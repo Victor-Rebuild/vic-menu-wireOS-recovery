@@ -206,7 +206,7 @@ func StartAnki() {
 	time.Sleep(time.Second / 3)
 	StopFrameGetter()
 	vbody.StopSpine()
-	scrnData = vscreen.CreateTextImage("Starting anki-robot.target...")
+	scrnData = vscreen.CreateTextImage("Starting anki-robot...")
 	vscreen.SetScreen(scrnData)
 	vscreen.StopLCD()
 	ScreenInited = false
@@ -338,7 +338,7 @@ func ClearUserData_Create() *List {
 func InstallSelectedOTA(url string) {
 	HangBody = true
 	if ssid, _ := getNet(); ssid == "<not connected>" {
-		scrnData := vscreen.CreateTextImage("This bot must first be connected to a Wi-Fi network.")
+		scrnData := vscreen.CreateTextImage("The robot must first be connected to Wi-Fi.")
 		vscreen.SetScreen(scrnData)
 		time.Sleep(time.Second * 3)
 		CurrentList = Recovery_Create()
@@ -355,7 +355,7 @@ func InstallSelectedOTA(url string) {
 			time.Sleep(time.Second / 3)
 			HangBody = false
 		} else {
-			scrnData := vscreen.CreateTextImage("error downloading OTA: " + err.Error())
+			scrnData := vscreen.CreateTextImage("Error downloading OTA: " + err.Error())
 			vscreen.SetScreen(scrnData)
 			time.Sleep(time.Second * 3)
 			CurrentList = Recovery_Create()
@@ -399,7 +399,7 @@ func DetectButtonPress() {
 func PrintNetworkInfo() {
 	c := *CurrentList
 	ssid, ip := getNet()
-	lines := []string{"SSID: " + ssid, "IP: " + ip, " ", " ", " ", " ", "> Back"}
+	lines := []string{"SSID: " + ssid, "IP: " + ip, " ", " ", " ", "> Back"}
 	scrnData := vscreen.CreateTextImageFromSlice(lines)
 	vscreen.SetScreen(scrnData)
 	HangBody = true
@@ -481,7 +481,7 @@ func Confirm_Create(do func(), origList List) *List {
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
-			Text:  "Go back",
+			Text:  "No",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 	}
