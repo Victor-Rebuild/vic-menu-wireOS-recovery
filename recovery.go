@@ -42,7 +42,7 @@ type OTA struct {
 var availableOTAs []OTA
 
 func LoadOTAConfig() error {
-    data, err := os.ReadFile("/data/ota-list.json")
+    data, err := os.ReadFile("/data/vic-menu/ota-list.json")
     if err != nil {
         return err
     }
