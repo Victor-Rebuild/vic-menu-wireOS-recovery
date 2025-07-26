@@ -1,0 +1,13 @@
+[Unit]
+Description=Recovery menu
+SourcePath=/data/vic-menu/vic-menu
+Wants=rampost.service
+After=rampost.service
+
+[Service]
+Type=simple
+ExecStart=/data/vic-menu/vic-menu
+Restart=yes
+
+[Install]
+WantedBy=multi-user.target
