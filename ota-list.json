@@ -18,11 +18,11 @@
   },
   {
     "name": "PurplOS",
-    "url": "http://update-server.api.froggitti.net:81/latest/dev.ota"
+    "url": "http://ota-cdn.froggitti.net:81/vic/latest/dev.ota"
   },
   {
     "name": "RedOS",
-    "url": "http://ota-cdn.ekeleze.net:82/latest/dev.ota"
+    "url": "http://ota-cdn.ekeleze.net:82/vic/latest/dev.ota"
   },
   {
     "name": "thommOS Dev",
