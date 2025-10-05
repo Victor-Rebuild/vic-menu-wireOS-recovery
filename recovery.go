@@ -192,7 +192,7 @@ func ListenToBody() {
 
 func StartAnki_Confirm() {
 	c := *CurrentList
-	CurrentList = Confirm_Create(StartAnki, c)
+	CurrentList = Confirm_Create_Anki(StartAnki, c)
 	CurrentList.Init()
 }
 
@@ -235,7 +235,7 @@ func StartAnki() {
 
 func StartRescue_Confirm() {
 	c := *CurrentList
-	CurrentList = Confirm_Create(StartRescue, c)
+	CurrentList = Confirm_Create_Anki(StartRescue, c)
 	CurrentList.Init()
 }
 
@@ -304,7 +304,7 @@ func Reboot_Create() *List {
 }
 
 func ClearUserData_Do() {
-	vscreen.SetScreen(vscreen.CreateTextImage("Clearing..."))
+	vscreen.SetScreen(vscreen.CreateTextImage("Clearing User Data..."))
 	exec.Command("/bin/bash", "-c", "blkdiscard -s /dev/block/bootdevice/by-name/userdata").Run()
 	exec.Command("/bin/bash", "-c", "blkdiscard -s /dev/block/bootdevice/by-name/switchboard").Run()
 	Reboot_Do()
@@ -337,7 +337,7 @@ func ClearUserData_Create() *List {
 
 func InstallSelectedOTA(url string) {
 	HangBody = true
-	if ssid, _ := getNet(); ssid == "<not connected>" {
+	if ssid, _, _ := getNet(); ssid == "<not connected>" {
 		scrnData := vscreen.CreateTextImage("The robot must first be connected to Wi-Fi.")
 		vscreen.SetScreen(scrnData)
 		time.Sleep(time.Second * 3)
@@ -370,18 +370,34 @@ func InstallSelectedOTA(url string) {
 	}
 }
 
-func getNet() (ssid string, ip string) {
+func CheckNetwork() bool {
+	ssid, _, _ := getNet()
+	if ssid == "<not connected>" {
+		HangBody = true
+		scrnData := vscreen.CreateTextImage("The robot must first be connected to Wi-Fi.")
+		vscreen.SetScreen(scrnData)
+		time.Sleep(time.Second * 3)
+		HangBody = false
+		return false
+	}
+	return true
+}
+
+func getNet() (ssid string, ip string, mac string) {
 	out, _ := exec.Command("/bin/bash", "-c", "iwgetid").Output()
+	macaddr, _ := exec.Command("/bin/bash", "-c", `/sbin/ifconfig wlan0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`).Output()
 	iwcmd := strings.TrimSpace(string(out))
 	if !strings.Contains(iwcmd, "ESSID") {
 		ssid = "<not connected>"
 		ip = "<not connected>"
+		mac = strings.TrimSpace(string(macaddr))
 	} else {
 		ssid = strings.Replace(strings.TrimSpace(strings.Split(iwcmd, "ESSID:")[1]), `"`, "", -1)
 		out, _ = exec.Command("/bin/bash", "-c", `/sbin/ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}'`).Output()
 		ip = strings.TrimSpace(string(out))
+		mac = strings.TrimSpace(string(macaddr))
 	}
-	return ssid, ip
+	return ssid, ip, mac
 }
 
 func DetectButtonPress() {
@@ -398,8 +414,8 @@ func DetectButtonPress() {
 
 func PrintNetworkInfo() {
 	c := *CurrentList
-	ssid, ip := getNet()
-	lines := []string{"SSID: " + ssid, "IP: " + ip, " ", " ", " ", "> Back"}
+	ssid, ip, mac := getNet()
+	lines := []string{"SSID: " + ssid, "IP: " + ip, "MAC: " + mac, " ", " ", "> Back"}
 	scrnData := vscreen.CreateTextImageFromSlice(lines)
 	vscreen.SetScreen(scrnData)
 	HangBody = true
@@ -424,7 +440,7 @@ func ClearUserData() {
 func Recovery_Create() *List {
 	var Test List
 
-	Test.Info = "Froggitti's Recovery Menu"
+	Test.Info = "Frog's Recovery Menu"
 	Test.InfoColor = color.RGBA{0, 255, 0, 255}
 
 	Test.ClickFunc = []func(){
@@ -433,8 +449,8 @@ func Recovery_Create() *List {
        PrintNetworkInfo,
        Rebooter,
        func() {
-           CurrentList = ShowOTAList_Create()
-          CurrentList.Init()
+        	CurrentList = ShowOTAList_Create()
+        	CurrentList.Init()
        },
    	} 
 
@@ -456,7 +472,7 @@ func Recovery_Create() *List {
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
-			Text:  "Install latest OTA",
+			Text:  "Install OTAs",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 	}
@@ -464,11 +480,11 @@ func Recovery_Create() *List {
 	return &Test
 }
 
-func Confirm_Create(do func(), origList List) *List {
+func Confirm_Create_Anki(do func(), origList List) *List {
 	// "ARE YOU SURE?"
 	var Test List
 
-	Test.Info = "Are you sure?"
+	Test.Info = "Start anki-robot?"
 	Test.InfoColor = color.RGBA{0, 255, 0, 255}
 	Test.ClickFunc = []func(){do, func() {
 		CurrentList = &origList
@@ -489,13 +505,52 @@ func Confirm_Create(do func(), origList List) *List {
 	return &Test
 }
 
+func Confirm_Install_OTA(do func(), origList List) *List {
+	// "ARE YOU SURE?"
+	var Test List
+
+	Test.Info = "Install this OTA?"
+	Test.InfoColor = color.RGBA{0, 255, 0, 255}
+	Test.ClickFunc = []func(){do, func() {
+		CurrentList = &origList
+		CurrentList.Init()
+	}}
+
+	Test.Lines = []vscreen.Line{
+		{
+			Text:  "Yes",
+			Color: color.RGBA{255, 255, 255, 255},
+		},
+		{
+			Text:  "No",
+			Color: color.RGBA{255, 255, 255, 255},
+		},
+	}
+
+	return &Test
+}
+
+func RefreshOTAListAlt() error {
+	os.Remove("/data/vic-menu/ota-list.json")
+	os.MkdirAll("/data/vic-menu/", 0755)
+
+	cmd := exec.Command("curl", "-o", "/data/vic-menu/ota-list.json", "api.froggitti.net/ota-list.json")
+	return cmd.Run()
+}
+
 func RefreshOTAList() {
 	HangBody = true
 	scrnData := vscreen.CreateTextImage("Refreshing OTA list...")
 	vscreen.SetScreen(scrnData)
 	
-	cmd := exec.Command("/usr/bin/update-ota-list")
-	err := cmd.Run()
+	var err error
+	
+	if _, statErr := os.Stat("/usr/bin/update-ota-list"); statErr == nil {
+		cmd := exec.Command("/usr/bin/update-ota-list")
+		err = cmd.Run()
+	} else {
+		err = RefreshOTAListAlt()
+	}
 	
 	if err != nil {
 		scrnData = vscreen.CreateTextImage("Error refreshing: " + err.Error())
@@ -514,8 +569,6 @@ func RefreshOTAList() {
 		time.Sleep(time.Second * 3)
 	}
 	
-	CurrentList = ShowOTAList_Create()
-	CurrentList.Init()
 	HangBody = false
 }
 
@@ -536,7 +589,7 @@ func ShowOTAListPage(page int) *List {
     for _, ota := range availableOTAs[start:end] {
         url := ota.URL
         l.ClickFunc = append(l.ClickFunc, func() {
-            CurrentList = Confirm_Create(func() {
+            CurrentList = Confirm_Install_OTA(func() {
                 InstallSelectedOTA(url)
             }, *CurrentList)
             CurrentList.Init()
@@ -546,14 +599,6 @@ func ShowOTAListPage(page int) *List {
             Color: color.RGBA{255, 255, 255, 255},
         })
     }
-
-    l.ClickFunc = append(l.ClickFunc, func() {
-        RefreshOTAList()
-    })
-    l.Lines = append(l.Lines, vscreen.Line{
-        Text:  "Refresh OTAs",
-        Color: color.RGBA{255, 255, 255, 255},
-    })
 
     // Prev button?
     if page > 0 {
@@ -596,6 +641,14 @@ func ShowOTAListPage(page int) *List {
 
 // entry point remains page 0
 func ShowOTAList_Create() *List {
+
+	if !CheckNetwork() {
+		CurrentList = Recovery_Create()
+		CurrentList.Init()
+		return CurrentList
+	}
+
+	RefreshOTAList()
 	if availableOTAs == nil {
         if err := LoadOTAConfig(); err != nil {
             // show an error and return to recovery
@@ -603,7 +656,8 @@ func ShowOTAList_Create() *List {
             errList.Info = "Error loading OTA list"
             errList.InfoColor = color.RGBA{255, 0, 0, 255}
             errList.Lines = []vscreen.Line{
-                {Text: err.Error(), Color: errList.InfoColor},
+				{Text: err.Error(), Color: errList.InfoColor},
+                {Text: "Refresh and Try Again",   Color: color.RGBA{255, 255, 255, 255}},
                 {Text: "Refresh OTAs",   Color: color.RGBA{255, 255, 255, 255}},
                 {Text: "Back",       Color: color.RGBA{255, 255, 255, 255}},
             }
@@ -611,6 +665,10 @@ func ShowOTAList_Create() *List {
                 func() {
                     CurrentList = Recovery_Create()
                     CurrentList.Init()
+                },
+                func() {
+					CurrentList = ShowOTAListPage(0)
+					CurrentList.Init()
                 },
                 func() {
                     RefreshOTAList()

@@ -84,10 +84,6 @@ func updateProgressScreen(progress float64) {
 			Color: color.RGBA{255, 255, 255, 255},
 		},
 		{
-			Text:  " ",
-			Color: color.RGBA{255, 255, 255, 255},
-		},
-		{
 			Text:  "> Cancel",
 			Color: color.RGBA{255, 255, 255, 255},
 		},
@@ -144,7 +140,7 @@ func StreamOTA(url string) error {
 	stopChan := make(chan bool, 1)
 
 	// Run the update process in a goroutine
-	updateCmd := exec.Command("/update", url)
+	updateCmd := exec.Command("/anki/bin/update-engine", url)
 	err := updateCmd.Start()
 	if err != nil {
 		return fmt.Errorf("Error starting update process: %w", err)
