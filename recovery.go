@@ -197,7 +197,7 @@ func StartAnki_Confirm() {
 }
 
 func StartAnki() {
-	scrnData := vscreen.CreateTextImage("To go back to the recovery menu, go to CCIS and select `BACK TO MENU`. Starting in 3 seconds...")
+	scrnData := vscreen.CreateTextImage("To come back to this menu, go to CCIS and select `MENU` or `BACK TO MENU`. Starting in 3 seconds...")
 	vscreen.SetScreen(scrnData)
 	time.Sleep(time.Second * 4)
 	scrnData = vscreen.CreateTextImage("Stopping body...")
@@ -424,7 +424,7 @@ func ClearUserData() {
 func Recovery_Create() *List {
 	var Test List
 
-	Test.Info = "Vec2.0 Recovery Menu"
+	Test.Info = "Froggitti's Recovery Menu"
 	Test.InfoColor = color.RGBA{0, 255, 0, 255}
 
 	Test.ClickFunc = []func(){
