@@ -489,8 +489,38 @@ func Confirm_Create(do func(), origList List) *List {
 	return &Test
 }
 
+func RefreshOTAList() {
+	HangBody = true
+	scrnData := vscreen.CreateTextImage("Refreshing OTA list...")
+	vscreen.SetScreen(scrnData)
+	
+	cmd := exec.Command("/usr/bin/update-ota-list")
+	err := cmd.Run()
+	
+	if err != nil {
+		scrnData = vscreen.CreateTextImage("Error refreshing: " + err.Error())
+		vscreen.SetScreen(scrnData)
+		time.Sleep(time.Second * 3)
+	} else {
+		scrnData = vscreen.CreateTextImage("OTA list refreshed!")
+		vscreen.SetScreen(scrnData)
+		time.Sleep(time.Second)
+	}
+	
+	availableOTAs = nil
+	if err := LoadOTAConfig(); err != nil {
+		scrnData = vscreen.CreateTextImage("Error loading: " + err.Error())
+		vscreen.SetScreen(scrnData)
+		time.Sleep(time.Second * 3)
+	}
+	
+	CurrentList = ShowOTAList_Create()
+	CurrentList.Init()
+	HangBody = false
+}
+
 func ShowOTAListPage(page int) *List {
-    const perPage = 3
+    const perPage = 2
     total := len(availableOTAs)
     start := page * perPage
     end := start + perPage
@@ -516,6 +546,14 @@ func ShowOTAListPage(page int) *List {
             Color: color.RGBA{255, 255, 255, 255},
         })
     }
+
+    l.ClickFunc = append(l.ClickFunc, func() {
+        RefreshOTAList()
+    })
+    l.Lines = append(l.Lines, vscreen.Line{
+        Text:  "Refresh OTAs",
+        Color: color.RGBA{255, 255, 255, 255},
+    })
 
     // Prev button?
     if page > 0 {
@@ -566,9 +604,17 @@ func ShowOTAList_Create() *List {
             errList.InfoColor = color.RGBA{255, 0, 0, 255}
             errList.Lines = []vscreen.Line{
                 {Text: err.Error(), Color: errList.InfoColor},
+                {Text: "Refresh OTAs",   Color: color.RGBA{255, 255, 255, 255}},
                 {Text: "Back",       Color: color.RGBA{255, 255, 255, 255}},
             }
             errList.ClickFunc = []func(){
+                func() {
+                    CurrentList = Recovery_Create()
+                    CurrentList.Init()
+                },
+                func() {
+                    RefreshOTAList()
+                },
                 func() {
                     CurrentList = Recovery_Create()
                     CurrentList.Init()
