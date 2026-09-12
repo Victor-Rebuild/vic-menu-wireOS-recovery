@@ -534,7 +534,7 @@ func RefreshOTAListAlt() error {
 	os.Remove("/data/vic-menu/ota-list.json")
 	os.MkdirAll("/data/vic-menu/", 0755)
 
-	cmd := exec.Command("curl", "-o", "/data/vic-menu/ota-list.json", "api.froggitti.net/ota-list.json")
+	cmd := exec.Command("curl", "-o", "/data/vic-menu/ota-list.json", "api.skittle.dev/ota-list.json")
 	return cmd.Run()
 }
 
